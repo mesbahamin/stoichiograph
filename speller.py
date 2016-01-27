@@ -1,49 +1,52 @@
 from collections import namedtuple
 import csv
+import sys
 
 
 def main():
     symbols = get_csv_data('elements.csv', 1)
-    test_word = "Osiris"
+
+    test_word = "Because"
 
     tokens = tokenize_sequence(test_word)
+    single_matches = find_matches(tokens.single, symbols)
+    pair_matches = find_matches(tokens.pair, symbols)
 
-    print(tokens.singles)
-    print(tokens.pairs)
-    print(find_matches(tokens.singles, symbols))
-    print(find_matches(tokens.pairs, symbols))
+    print(single_matches, pair_matches)
+
+
 
 def tokenize_sequence(sequence):
-    """Splits a sequence into one list of individual elements, and one of pairs."""
+    t = namedtuple('Tokens', (['single', 'pair']))
 
-    t = namedtuple('Tokens', (['singles', 'pairs']))
-
-    singles = [sequence[i:i+1] for i in range(0, len(sequence))]
-    pairs = [sequence[i:i+2] for i in range(0, len(sequence) - 1)]
-    tokens = t(singles, pairs)
+    single = [sequence[i:i+1] for i in range(0, len(sequence))]
+    pair = [sequence[i:i+2] for i in range(0, len(sequence) - 1)]
+    tokens = t(single, pair)
 
     return tokens
 
 
 def find_matches(sequence, symbols):
     matches = []
+    lower_symbols = [i.lower() for i in symbols]
+    lower_sequence = [i.lower() for i in sequence]
 
-    for i in sequence:
-        matches += (x for x in symbols if x == i)
-
+    for i in lower_sequence:
+        matches += (x for x in lower_symbols if x == i)
+    # TODO: Make this return an array of indices
     return matches
 
 
 def get_csv_data(file_name, column):
-    symbols = []
+    data = []
 
     with open(file_name) as infile:
         csv_reader = csv.reader(infile, skipinitialspace=True, delimiter=',')
         next(csv_reader, None)
         for row in csv_reader:
-            symbols.append(row[column])
+            data.append(row[column])
 
-    return symbols
+    return data
 
 
 if __name__ == '__main__':
