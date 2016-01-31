@@ -15,7 +15,6 @@ def main():
     print(single_matches, pair_matches)
 
 
-
 def tokenize_sequence(sequence):
     t = namedtuple('Tokens', (['single', 'pair']))
 
@@ -28,12 +27,13 @@ def tokenize_sequence(sequence):
 
 def find_matches(sequence, symbols):
     matches = []
+    indices = []
     lower_symbols = [i.lower() for i in symbols]
     lower_sequence = [i.lower() for i in sequence]
 
     for i in lower_sequence:
         matches += (x for x in lower_symbols if x == i)
-    # TODO: Make this return an array of indices
+        indices += (lower_symbols.index(x) for x in lower_symbols if x == i)
     return matches
 
 
