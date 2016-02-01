@@ -16,6 +16,7 @@ def main():
 
 
 def tokenize_sequence(sequence):
+    """Return a list each of all single and double character tokens."""
     t = namedtuple('Tokens', (['single', 'pair']))
 
     single = [sequence[i:i+1] for i in range(0, len(sequence))]
@@ -26,6 +27,9 @@ def tokenize_sequence(sequence):
 
 
 def find_matches(sequence, symbols):
+    """Return a list of all element symbols matching
+    an item in the given sequence.
+    """
     matches = []
     indices = []
     lower_symbols = [i.lower() for i in symbols]
@@ -34,10 +38,12 @@ def find_matches(sequence, symbols):
     for i in lower_sequence:
         matches += (x for x in lower_symbols if x == i)
         indices += (lower_symbols.index(x) for x in lower_symbols if x == i)
+
     return matches
 
 
 def get_csv_data(file_name, column):
+    """Return in a list all data from a given column of a .csv file"""
     data = []
 
     with open(file_name) as infile:
