@@ -5,6 +5,7 @@ import unittest
 class MatchingTest(unittest.TestCase):
     test_singles = ['B', 'e', 'c', 'a', 'u', 's', 'e']
     test_pairs = ['Be', 'ec', 'ca', 'au', 'se']
+    #TODO: change this so it never fails
     symbols = speller.get_csv_data('elements.csv', 1)
 
     def test_match_singles(self):
@@ -26,6 +27,15 @@ class TokensTest(unittest.TestCase):
     def test_pair_chars(self):
         tokens = speller.tokenize_sequence(self.test_word)
         self.assertEqual(tokens.pair, ["Os", "si", "ir", "ri", "is"])
+
+
+class GroupingTest(unittest.TestCase):
+    word = "that"
+
+    def test_singles_and_pairs(self):
+        expected_maps = [(2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1,1,1,1)]
+        group_maps = speller.groupings(self.word)
+        self.assertEqual(group_maps, expected_maps)
 
 
 class FileTest(unittest.TestCase):

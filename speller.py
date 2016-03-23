@@ -1,18 +1,25 @@
+# TODO:
+# test that all letters in word are present in some element
+# generate group_maps only for the exact number of chars in word
+#  
+
 from collections import namedtuple
+from itertools import chain, product
 import csv
 import sys
 
 
-def main():
-    symbols = get_csv_data('elements.csv', 1)
+def get_csv_data(file_name, column):
+    """Return in a list all data from a given column of a .csv file"""
+    data = []
 
-    test_word = "Because"
+    with open(file_name) as infile:
+        csv_reader = csv.reader(infile, skipinitialspace=True, delimiter=',')
+        next(csv_reader, None)
+        for row in csv_reader:
+            data.append(row[column])
 
-    tokens = tokenize_sequence(test_word)
-    single_matches = find_matches(tokens.single, symbols)
-    pair_matches = find_matches(tokens.pair, symbols)
-
-    print(single_matches, pair_matches)
+    return data
 
 
 def tokenize_sequence(sequence):
@@ -42,17 +49,38 @@ def find_matches(sequence, symbols):
     return matches
 
 
-def get_csv_data(file_name, column):
-    """Return in a list all data from a given column of a .csv file"""
-    data = []
+def groupings(word, group_sizes = [1,2]):
+    """Return a list of all permutations of possible character grouping
+    arrangements of a word. group_sizes defines the possible sizes of 
+    character groups, and by default allows only singles and pairs.
+    """
+    group_maps = []
+    length = len(word)
+    cartesian_product = (product(group_sizes, repeat=r)
+                         for r in range(1, length + 1))
+    products = chain.from_iterable(cartesian_product)
 
-    with open(file_name) as infile:
-        csv_reader = csv.reader(infile, skipinitialspace=True, delimiter=',')
-        next(csv_reader, None)
-        for row in csv_reader:
-            data.append(row[column])
+    # include only products that represent the correct number of chars
+    for p in products:
+        if sum(p) == length:
+            p = [tuple(x for x in p)]
+            for x in p:
+                if x not in group_maps:
+                    group_maps.append(x)
 
-    return data
+    return group_maps 
+
+
+def main():
+    symbols = get_csv_data('elements.csv', 1)
+
+    test_word = "Because"
+
+    tokens = tokenize_sequence(test_word)
+    single_matches = find_matches(tokens.single, symbols)
+    pair_matches = find_matches(tokens.pair, symbols)
+
+    print(single_matches, pair_matches)
 
 
 if __name__ == '__main__':
