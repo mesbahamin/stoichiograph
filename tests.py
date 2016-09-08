@@ -1,7 +1,5 @@
-import speller
-import unittest
-
-# TODO: change to py.test syntax
+import elemental_speller as es
+import pytest
 
 ELEMENTS = (
     'Ac', 'Ag', 'Al', 'Am', 'Ar', 'As', 'At', 'Au', 'B', 'Ba', 'Be', 'Bh',
@@ -16,66 +14,30 @@ ELEMENTS = (
     'Uup', 'Uuq', 'Uus', 'Uut', 'V', 'W', 'Xe', 'Y', 'Yb', 'Zn', 'Zr'
 )
 
-class MatchingTest(unittest.TestCase):
-    test_singles = ['B', 'e', 'c', 'a', 'u', 's', 'e']
-    test_pairs = ['Be', 'ec', 'ca', 'au', 'se']
 
-    def test_match_singles(self):
-        matches = speller.find_matches(self.test_singles, ELEMENTS)
-        self.assertEqual(
-            matches,
-            {'S': 86, 'B': 8, 'U': 103, 'C': 15}
-        )
-
-    def test_match_pairs(self):
-        matches = speller.find_matches(self.test_pairs, ELEMENTS)
-        self.assertEqual(
-            matches,
-            {'Au': 7, 'Be': 10, 'Ca': 16, 'Se': 89}
-        )
+def test_verify_data():
+    assert es.ELEMENTS == ELEMENTS
 
 
-class TokensTest(unittest.TestCase):
-    test_word = "Osiris"
+def test_groupings():
+    assert es._groupings(4, token_sizes=()) == ()
 
-    def test_single_chars(self):
-        tokens = speller.tokenize_sequence(self.test_word)
-        self.assertEqual(tokens.singles, ("O", "s", "i", "r", "i", "s"))
+    expected = ((2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1))
+    assert es._groupings(4, token_sizes=(1, 2)) == expected
 
-    def test_pair_chars(self):
-        tokens = speller.tokenize_sequence(self.test_word)
-        self.assertEqual(tokens.doubles, ("Os", "si", "ir", "ri", "is"))
-
-
-class GroupingTest(unittest.TestCase):
-    word = "that"
-
-    def test_singles_and_pairs(self):
-        expected_maps = ((2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1))
-        group_maps = speller.groupings(self.word)
-        self.assertEqual(group_maps, expected_maps)
+    expected = (
+        (1, 3), (2, 2), (3, 1), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1)
+    )
+    assert es._groupings(4, token_sizes=(1, 2, 3)) == expected
 
 
-class FileTest(unittest.TestCase):
-    file_name = "elements.csv"
-
-    proper_data = ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne',
-                   'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca',
-                   'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn',
-                   'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr',
-                   'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn',
-                   'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd',
-                   'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb',
-                   'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg',
-                   'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th',
-                   'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 'Fm',
-                   'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds',
-                   'Rg', 'Uub', 'Uut', 'Uuq', 'Uup', 'Uuh', 'Uus', 'Uuo']
-
-    def test_file_contains_proper_data(self):
-        data = speller.get_csv_data(self.file_name, 1)
-        self.assertEqual(data, self.proper_data)
+def test_map_word():
+    assert es._map_word('because', (1, 2, 1, 1, 2)) == ('b', 'ec', 'a', 'u', 'se')
+    assert es._map_word('osiris', (1, 3, 2)) == ('o', 'sir', 'is')
 
 
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
+def test_elemental_spelling():
+    assert es.elemental_spelling('amputation') == [
+        ('Am', 'Pu', 'Ta', 'Ti', 'O', 'N'),
+        ('Am', 'P', 'U', 'Ta', 'Ti', 'O', 'N')
+    ]
