@@ -1,8 +1,15 @@
-# TODO: add logging
-
-from collections import namedtuple
 from itertools import chain, product
+import logging
 
+# TODO(amin): Profile and optimize
+# TODO(amin): Add performance reporting to log
+# TODO(amin): Use recursion to save time with long words that can't be spelled.
+# TODO(amin): Convert symbol tuple to element name or atomic number tuple
+
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
+
+# TODO(amin): Ensure elements are up to date (Fl, Lv)
 ELEMENTS = (
     'Ac', 'Ag', 'Al', 'Am', 'Ar', 'As', 'At', 'Au', 'B', 'Ba', 'Be', 'Bh',
     'Bi', 'Bk', 'Br', 'C', 'Ca', 'Cd', 'Ce', 'Cf', 'Cl', 'Cm', 'Co', 'Cr',
@@ -17,6 +24,9 @@ ELEMENTS = (
 )
 
 
+# TODO(amin): Use optional caching/memoization to improve performance
+# TODO(amin): Support appostrophies
+# TODO(amin): Add option to require no repeated symbols
 def elemental_spelling(word, symbols=ELEMENTS):
     """Given a word and a sequence of symbols (tokens),
     return a list of any possible ways to spell that word
@@ -24,8 +34,9 @@ def elemental_spelling(word, symbols=ELEMENTS):
 
     Example:
     >>> elemental_spelling('amputation')
-    [(('Am', 'Pu', 'Ta', 'Ti', 'O', 'N'), ('Am', 'P', 'U', 'Ta', 'Ti', 'O', 'N')]
+    [('Am', 'Pu', 'Ta', 'Ti', 'O', 'N'), ('Am', 'P', 'U', 'Ta', 'Ti', 'O', 'N')]
     """
+    log.info('Word: {}'.format(word))
     letter_groupings = _groupings(len(word))
 
     spellings = [_map_word(word, grouping) for grouping in letter_groupings]
@@ -37,10 +48,12 @@ def elemental_spelling(word, symbols=ELEMENTS):
         if set(s.lower() for s in spelling) <= set(s.lower() for s in symbols)
     ]
 
+    log.info('Spellings: {}'.format(elemental_spellings))
+
     return elemental_spellings
 
 
-def _groupings(word_length, token_sizes=(1, 2, 3)):
+def _groupings(word_length, token_sizes=(1, 2)):
     """Return a tuple of all character groupings for a word
     of a given length.
 
@@ -58,6 +71,7 @@ def _groupings(word_length, token_sizes=(1, 2, 3)):
     ((2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1))
     """
 
+    # TODO(amin): Why do I need to add 1 to word_length?
     cartesian_products = (
         product(token_sizes, repeat=r)
         for r in range(1, word_length + 1)
@@ -70,9 +84,12 @@ def _groupings(word_length, token_sizes=(1, 2, 3)):
         if sum(grouping) == word_length
     )
 
+    log.debug('Groupings: {}'.format(groupings))
+
     return groupings
 
 
+# TODO(amin): Handle failure cases (grouping doesn't add up to word length)
 def _map_word(word, grouping):
     """Return a tuple of tokens: word mapped to a grouping.
 
@@ -89,6 +106,8 @@ def _map_word(word, grouping):
         for _ in range(char_group_size):
             char_group += next(word_chars)
         mapped.append(char_group)
+
+    log.debug('Grouping: {}. Mapped word: {}'.format(grouping, mapped))
 
     return tuple(mapped)
 

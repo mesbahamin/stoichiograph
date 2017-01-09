@@ -9,7 +9,7 @@ test:
 	py.test tests.py
 
 lint:
-	flake8 *.py
+	flake8 *.py --max-line-length 90
 
 watch-log:
 	tail -f debug.log

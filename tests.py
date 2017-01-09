@@ -1,5 +1,4 @@
 import elemental_speller as es
-import pytest
 
 ELEMENTS = (
     'Ac', 'Ag', 'Al', 'Am', 'Ar', 'As', 'At', 'Au', 'B', 'Ba', 'Be', 'Bh',
