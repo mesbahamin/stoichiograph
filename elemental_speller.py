@@ -26,19 +26,18 @@ ELEMENTS = (
 # TODO(amin): Use optional caching/memoization to improve performance
 # TODO(amin): Support appostrophies
 # TODO(amin): Add option to require no repeated symbols
-def elemental_spelling(word, symbols=ELEMENTS):
-    """Given a word and a sequence of symbols (tokens),
-    return a list of any possible ways to spell that word
-    with those symbols.
+def spell(word, symbols=ELEMENTS):
+    """Return a list of any possible ways to spell a word
+    with a given set of symbols.
 
     Example:
-    >>> elemental_spelling('amputation')
+    >>> spell('amputation')
     [('Am', 'Pu', 'Ta', 'Ti', 'O', 'N'), ('Am', 'P', 'U', 'Ta', 'Ti', 'O', 'N')]
     """
     log.info('Word: {}'.format(word))
-    letter_groupings = _groupings(len(word))
+    groupings = generate_groupings(len(word))
 
-    spellings = [_map_word(word, grouping) for grouping in letter_groupings]
+    spellings = [map_word(word, grouping) for grouping in groupings]
 
     elemental_spellings = [
         tuple(token.capitalize() for token in spelling)
@@ -52,26 +51,19 @@ def elemental_spelling(word, symbols=ELEMENTS):
     return elemental_spellings
 
 
-def _groupings(word_length, token_sizes=(1, 2)):
-    """Return a tuple of all character groupings for a word
-    of a given length.
+def generate_groupings(word_length, group_sizes=(1, 2)):
+    """Return all groupings for a word of a given length.
 
-    A character grouping is a tuple representing the distribution
-    of characters in a tokenized word.
-
-    The word 'canary', if mapped to the grouping (1, 3, 2), would
-    be broken down into ['c', 'ana', 'ry'].
-
-    token_sizes defines the possible sizes of character groups,
-    and by default allows only singles, pairs, and triplets.
+    A grouping is a tuple representing the distribution of
+    characters in a word. By default, characters can be in
+    groups of 1 or 2.
 
     Example:
-    >>> _groupings(4, token_sizes=(1, 2))
+    >>> generate_groupings(4)
     ((2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1))
     """
-
     cartesian_products = (
-        product(token_sizes, repeat=r)
+        product(group_sizes, repeat=r)
         for r in range(1, word_length + 1)
     )
 
@@ -88,22 +80,21 @@ def _groupings(word_length, token_sizes=(1, 2)):
 
 
 # TODO(amin): Handle failure cases (grouping doesn't add up to word length)
-def _map_word(word, grouping):
-    """Return a tuple of tokens: word mapped to a grouping.
+def map_word(word, grouping):
+    """Return a word mapped to a grouping.
 
     Example:
-    >>> _map_word('because', (1, 2, 1, 1, 2))
+    >>> map_word('because', (1, 2, 1, 1, 2))
     ('b', 'ec', 'a', 'u', 'se')
     """
-
-    word_chars = (c for c in word)
+    chars = (c for c in word)
 
     mapped = []
-    for char_group_size in grouping:
-        char_group = ""
-        for _ in range(char_group_size):
-            char_group += next(word_chars)
-        mapped.append(char_group)
+    for group_size in grouping:
+        group = ""
+        for _ in range(group_size):
+            group += next(chars)
+        mapped.append(group)
 
     log.debug('Grouping: {}. Mapped word: {}'.format(grouping, mapped))
 
@@ -112,4 +103,4 @@ def _map_word(word, grouping):
 
 if __name__ == '__main__':
     test_word = 'Mockery'
-    print('{}:\n{}'.format(test_word, elemental_spelling(test_word)))
+    print('{}:\n{}'.format(test_word, spell(test_word)))

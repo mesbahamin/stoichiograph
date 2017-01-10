@@ -19,24 +19,24 @@ def test_verify_data():
 
 
 def test_groupings():
-    assert es._groupings(4, token_sizes=()) == ()
+    assert es.generate_groupings(4, group_sizes=()) == ()
 
-    expected = ((2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1))
-    assert es._groupings(4, token_sizes=(1, 2)) == expected
+    assert es.generate_groupings(4, group_sizes=(1, 2)) == (
+        (2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1)
+    )
 
-    expected = (
+    assert es.generate_groupings(4, group_sizes=(1, 2, 3)) == (
         (1, 3), (2, 2), (3, 1), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1)
     )
-    assert es._groupings(4, token_sizes=(1, 2, 3)) == expected
 
 
 def test_map_word():
-    assert es._map_word('because', (1, 2, 1, 1, 2)) == ('b', 'ec', 'a', 'u', 'se')
-    assert es._map_word('osiris', (1, 3, 2)) == ('o', 'sir', 'is')
+    assert es.map_word('because', (1, 2, 1, 1, 2)) == ('b', 'ec', 'a', 'u', 'se')
+    assert es.map_word('osiris', (1, 3, 2)) == ('o', 'sir', 'is')
 
 
 def test_elemental_spelling():
-    assert es.elemental_spelling('amputation') == [
+    assert es.spell('amputation') == [
         ('Am', 'Pu', 'Ta', 'Ti', 'O', 'N'),
         ('Am', 'P', 'U', 'Ta', 'Ti', 'O', 'N')
     ]
