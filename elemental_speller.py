@@ -51,19 +51,19 @@ def spell(word, symbols=ELEMENTS):
     return elemental_spellings
 
 
-def generate_groupings(word_length, group_sizes=(1, 2)):
+def generate_groupings(word_length, batch_sizes=(1, 2)):
     """Return all groupings for a word of a given length.
 
     A grouping is a tuple representing the distribution of
     characters in a word. By default, characters can be in
-    groups of 1 or 2.
+    batches of 1 or 2.
 
     Example:
     >>> generate_groupings(4)
     ((2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1))
     """
     cartesian_products = (
-        product(group_sizes, repeat=r)
+        product(batch_sizes, repeat=r)
         for r in range(1, word_length + 1)
     )
 
@@ -95,11 +95,11 @@ def map_word(word, grouping):
     chars = (c for c in word)
 
     mapped = []
-    for group_size in grouping:
-        group = ""
-        for _ in range(group_size):
-            group += next(chars)
-        mapped.append(group)
+    for batch_size in grouping:
+        batch = ""
+        for _ in range(batch_size):
+            batch += next(chars)
+        mapped.append(batch)
 
     log.debug('Grouping: {}. Mapped word: {}'.format(grouping, mapped))
 

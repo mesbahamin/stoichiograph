@@ -20,13 +20,13 @@ def test_verify_data():
 
 
 def test_groupings():
-    assert es.generate_groupings(4, group_sizes=()) == ()
+    assert es.generate_groupings(4, batch_sizes=()) == ()
 
-    assert es.generate_groupings(4, group_sizes=(1, 2)) == (
+    assert es.generate_groupings(4, batch_sizes=(1, 2)) == (
         (2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1)
     )
 
-    assert es.generate_groupings(4, group_sizes=(1, 2, 3)) == (
+    assert es.generate_groupings(4, batch_sizes=(1, 2, 3)) == (
         (1, 3), (2, 2), (3, 1), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1)
     )
 
