@@ -79,7 +79,6 @@ def generate_groupings(word_length, group_sizes=(1, 2)):
     return groupings
 
 
-# TODO(amin): Handle failure cases (grouping doesn't add up to word length)
 def map_word(word, grouping):
     """Return a word mapped to a grouping.
 
@@ -87,6 +86,12 @@ def map_word(word, grouping):
     >>> map_word('because', (1, 2, 1, 1, 2))
     ('b', 'ec', 'a', 'u', 'se')
     """
+    if len(word) != sum(grouping):
+        raise ValueError(
+            'Word length ({}) != sum of elements in grouping ({})'.format(
+                len(word), sum(grouping))
+        )
+
     chars = (c for c in word)
 
     mapped = []

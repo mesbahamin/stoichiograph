@@ -1,3 +1,4 @@
+import pytest
 import elemental_speller as es
 
 ELEMENTS = (
@@ -33,6 +34,10 @@ def test_groupings():
 def test_map_word():
     assert es.map_word('because', (1, 2, 1, 1, 2)) == ('b', 'ec', 'a', 'u', 'se')
     assert es.map_word('osiris', (1, 3, 2)) == ('o', 'sir', 'is')
+
+    with pytest.raises(ValueError):
+        es.map_word('toolong', (2, 1))
+        es.map_word('short', (2, 2, 2))
 
 
 def test_elemental_spelling():
