@@ -1,5 +1,5 @@
 import pytest
-import elemental_speller as es
+import speller
 
 ELEMENTS = (
     'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al',
@@ -16,32 +16,32 @@ ELEMENTS = (
 
 
 def test_verify_data():
-    assert es.ELEMENTS == ELEMENTS
+    assert speller.ELEMENTS == ELEMENTS
 
 
 def test_groupings():
-    assert es.generate_groupings(4, batch_sizes=()) == ()
+    assert speller.generate_groupings(4, batch_sizes=()) == ()
 
-    assert es.generate_groupings(4, batch_sizes=(1, 2)) == (
+    assert speller.generate_groupings(4, batch_sizes=(1, 2)) == (
         (2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1)
     )
 
-    assert es.generate_groupings(4, batch_sizes=(1, 2, 3)) == (
+    assert speller.generate_groupings(4, batch_sizes=(1, 2, 3)) == (
         (1, 3), (2, 2), (3, 1), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1)
     )
 
 
 def test_map_word():
-    assert es.map_word('because', (1, 2, 1, 1, 2)) == ('b', 'ec', 'a', 'u', 'se')
-    assert es.map_word('osiris', (1, 3, 2)) == ('o', 'sir', 'is')
+    assert speller.map_word('because', (1, 2, 1, 1, 2)) == ('b', 'ec', 'a', 'u', 'se')
+    assert speller.map_word('osiris', (1, 3, 2)) == ('o', 'sir', 'is')
 
     with pytest.raises(ValueError):
-        es.map_word('toolong', (2, 1))
-        es.map_word('short', (2, 2, 2))
+        speller.map_word('toolong', (2, 1))
+        speller.map_word('short', (2, 2, 2))
 
 
 def test_elemental_spelling():
-    assert es.spell('amputation') == [
+    assert speller.spell('amputation') == [
         ('Am', 'Pu', 'Ta', 'Ti', 'O', 'N'),
         ('Am', 'P', 'U', 'Ta', 'Ti', 'O', 'N')
     ]

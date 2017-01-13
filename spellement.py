@@ -6,7 +6,7 @@ import json
 import logging
 import pathlib
 
-import elemental_speller as es
+import speller
 
 __title__ = 'Elemental Speller'
 __author__ = 'Amin Mesbah'
@@ -70,8 +70,8 @@ def main():
         raise SystemExit
 
     if args.list_elements:
-        print('{} Elements:'.format(len(es.ELEMENTS)))
-        print(sorted(list(es.ELEMENTS)))
+        print('{} Elements:'.format(len(speller.ELEMENTS)))
+        print(sorted(list(speller.ELEMENTS)))
         raise SystemExit
 
     if args.debug:
@@ -113,9 +113,9 @@ def main():
 
     for word in words:
         if TUPLES:
-            spellings = es.spell(word)
+            spellings = speller.spell(word)
         else:
-            spellings = [''.join(s) for s in es.spell(word)]
+            spellings = [''.join(s) for s in speller.spell(word)]
 
         if spellings:
             spellable[word] = spellings

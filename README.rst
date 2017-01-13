@@ -1,5 +1,5 @@
-Elemental Speller
-=================
+Spellement
+==========
 
 Spell words with elemental symbols from the periodic table ("He", "Cu", etc).
 
