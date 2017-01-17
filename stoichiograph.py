@@ -8,14 +8,17 @@ import pathlib
 
 import speller
 
-__title__ = 'Elemental Speller'
+__title__ = 'stoichiograph'
 __author__ = 'Amin Mesbah'
 __version__ = '0.0.1'
 __description__='Spell words with elemental symbols from the periodic table.'
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description=__description__)
+    parser = argparse.ArgumentParser(
+        prog=__title__,
+        description=__description__
+    )
     parser.add_argument(
         'words',
         help='word(s) for which to find elemental spellings',
