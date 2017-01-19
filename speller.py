@@ -1,3 +1,4 @@
+from functools import lru_cache
 from itertools import chain, product
 import logging
 
@@ -51,6 +52,7 @@ def spell(word, symbols=ELEMENTS):
     return elemental_spellings
 
 
+@lru_cache(maxsize=None)
 def generate_groupings(word_length, batch_sizes=(1, 2)):
     """Return all groupings for a word of a given length.
 
@@ -75,6 +77,7 @@ def generate_groupings(word_length, batch_sizes=(1, 2)):
     )
 
     log.debug('Groupings: {}'.format(groupings))
+    log.debug(generate_groupings.cache_info())
 
     return groupings
 

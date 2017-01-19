@@ -11,7 +11,7 @@ import speller
 __title__ = 'stoichiograph'
 __author__ = 'Amin Mesbah'
 __version__ = '0.0.1'
-__description__='Spell words with elemental symbols from the periodic table.'
+__description__ = 'Spell words with elemental symbols from the periodic table.'
 
 
 def get_args():
