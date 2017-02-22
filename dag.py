@@ -1,5 +1,17 @@
 from collections import defaultdict, namedtuple
 
+ELEMENTS = {
+    'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al',
+    'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe',
+    'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y',
+    'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb',
+    'Te', 'I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd',
+    'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir',
+    'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac',
+    'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No',
+    'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Nh', 'Fl',
+    'Mc', 'Lv', 'Ts', 'Og'
+}
 
 # A single node of the graph.
 Node = namedtuple('Node', ['value', 'position'])
@@ -67,7 +79,7 @@ def find_all_paths(graph, start, end, path=[]):
     return paths
 
 
-def build_graph(word, graph):
+def build_graph(word, graph, symbols=ELEMENTS):
     """Given a word and a graph, recursively find all single and
     double-character tokens in the word and add them to the graph.
     """
@@ -78,19 +90,21 @@ def build_graph(word, graph):
             return
 
         single_root = Node(word[0], position)
-        graph.add_edge(previous_root, single_root)
+        if single_root.value.capitalize() in symbols:
+            graph.add_edge(previous_root, single_root)
 
-        if word not in processed:
-            single_stem = word[1:]
-            segments(single_stem, position + 1, previous_root=single_root)
+            if word not in processed:
+                single_stem = word[1:]
+                segments(single_stem, position + 1, previous_root=single_root)
 
         if len(word) >= 2:
             double_root = Node(word[0:2], position)
-            graph.add_edge(previous_root, double_root)
+            if double_root.value.capitalize() in symbols:
+                graph.add_edge(previous_root, double_root)
 
-            if word not in processed:
-                double_stem = word[2:]
-                segments(double_stem, position + 2, previous_root=double_root)
+                if word not in processed:
+                    double_stem = word[2:]
+                    segments(double_stem, position + 2, previous_root=double_root)
         processed.add(word)
 
     processed = set()
