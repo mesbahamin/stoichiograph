@@ -1,17 +1,13 @@
+from collections import defaultdict, namedtuple
 from functools import lru_cache
-from itertools import chain, product
 import logging
-import dag
 
-# TODO(amin): Profile and optimize
-# TODO(amin): Add performance reporting to log
-# TODO(amin): Use recursion to save time with long words that can't be spelled.
 # TODO(amin): Convert symbol tuple to element name or atomic number tuple
 
 log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
-ELEMENTS = (
+ELEMENTS = {
     'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al',
     'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe',
     'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y',
@@ -22,13 +18,13 @@ ELEMENTS = (
     'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No',
     'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Nh', 'Fl',
     'Mc', 'Lv', 'Ts', 'Og'
-)
+}
 
 
 # TODO(amin): Use optional caching/memoization to improve performance
 # TODO(amin): Support appostrophies
 # TODO(amin): Add option to require no repeated symbols
-def spell(word, use_graph=False, symbols=ELEMENTS):
+def spell(word, symbols=ELEMENTS):
     """Return a list of any possible ways to spell a word
     with a given set of symbols.
 
@@ -38,88 +34,122 @@ def spell(word, use_graph=False, symbols=ELEMENTS):
     """
     log.info('Word: {}'.format(word))
 
-    if use_graph:
-        log.debug('Using graph speller')
-        g = dag.Graph()
-        dag.build_graph(word, g)
+    log.debug('Using graph speller')
+    g = Graph()
+    build_graph(word, g)
 
-        spellings = list()
-        for first in g.firsts():
-            for last in g.lasts():
-                for path in dag.find_all_paths(g._children_of, first, last):
-                    spellings.append(tuple(node.value for node in path))
+    spellings = list()
+    for first in g.firsts():
+        for last in g.lasts():
+            for path in find_all_paths(g._children_of, first, last):
+                spellings.append(tuple(node.value for node in path))
 
-    else:
-        groupings = generate_groupings(len(word))
-        spellings = [map_word(word, grouping) for grouping in groupings]
-
-    elemental_spellings = [
+    elemental_spellings = sorted([
         tuple(token.capitalize() for token in spelling)
         for spelling in spellings
-        # set operation: set of chars in spelling is subset of set of symbols
-        if set(s.lower() for s in spelling) <= set(s.lower() for s in symbols)
-    ]
+    ], reverse=True)
 
     log.info('Spellings: {}'.format(elemental_spellings))
 
     return elemental_spellings
 
 
-@lru_cache(maxsize=None)
-def generate_groupings(word_length, batch_sizes=(1, 2)):
-    """Return all groupings for a word of a given length.
+# A single node of the graph.
+Node = namedtuple('Node', ['value', 'position'])
 
-    A grouping is a tuple representing the distribution of
-    characters in a word. By default, characters can be in
-    batches of 1 or 2.
 
-    Example:
-    >>> generate_groupings(4)
-    ((2, 2), (1, 1, 2), (1, 2, 1), (2, 1, 1), (1, 1, 1, 1))
+class Graph():
+    """A directed acyclic graph that stores all possible
+    elemental spellings of a word.
     """
-    cartesian_products = (
-        product(batch_sizes, repeat=r)
-        for r in range(1, word_length + 1)
-    )
+    def __init__(self):
+        self._parents_of = defaultdict(set)
+        self._children_of = defaultdict(set)
 
-    # include only groupings that represent the correct number of chars
-    groupings = tuple(
-        grouping
-        for grouping in chain.from_iterable(cartesian_products)
-        if sum(grouping) == word_length
-    )
+    def firsts(self):
+        """Return nodes with no parents."""
+        return self._children_of[None]
 
-    log.debug('Groupings: {}'.format(groupings))
-    log.debug(generate_groupings.cache_info())
+    def lasts(self):
+        """Return nodes with no children."""
+        return self._parents_of[None]
 
-    return groupings
+    def add_edge(self, parent, child):
+        """Add a parent-child relatonship to the graph.
+        None is ok as a key, but not a value.
+        """
+        if parent is not None:
+            self._parents_of[child].add(parent)
+        if child is not None:
+            self._children_of[parent].add(child)
+
+    def edges(self):
+        """Return a list of all parent-child relationships."""
+        return [
+            (parent, child)
+            for parent in self._children_of
+            for child in self._children_of[parent]
+        ]
+
+    def export(self):
+        """Print a string to stdout that can be interpreted by
+        Graphviz.
+        """
+        print('digraph G {')
+        for (parent, child) in self.edges():
+            a = None if parent is None else parent.value
+            b = None if child is None else child.value
+            print('\t{} -> {}'.format(a, b))
+        print('}')
 
 
-def map_word(word, grouping):
-    """Return a word mapped to a grouping.
-
-    Example:
-    >>> map_word('because', (1, 2, 1, 1, 2))
-    ('b', 'ec', 'a', 'u', 'se')
+def find_all_paths(graph, start, end, path=[]):
+    """Return a list of all paths through the graph from start
+    to end.
+    Based on https://www.python.org/doc/essays/graphs/
     """
-    if len(word) != sum(grouping):
-        raise ValueError(
-            'Word length ({}) != sum of elements in grouping ({})'.format(
-                len(word), sum(grouping))
-        )
+    path = path + [start]
+    if start == end:
+        return [path]
+    if start not in graph.keys():
+        return []
+    paths = []
+    for node in graph[start]:
+        if node not in path:
+            newpaths = find_all_paths(graph, node, end, path)
+            for newpath in newpaths:
+                paths.append(tuple(newpath))
+    return paths
 
-    chars = (c for c in word)
 
-    mapped = []
-    for batch_size in grouping:
-        batch = ""
-        for _ in range(batch_size):
-            batch += next(chars)
-        mapped.append(batch)
+def build_graph(word, graph, symbols=ELEMENTS):
+    """Given a word and a graph, recursively find all single and
+    double-character tokens in the word and add them to the graph.
+    """
 
-    log.debug('Grouping: {}. Mapped word: {}'.format(grouping, mapped))
+    def segments(word, position=0, previous_root=None):
+        if word == '':
+            graph.add_edge(previous_root, None)
+            return
 
-    return tuple(mapped)
+        single_root = Node(word[0], position)
+        if single_root.value.capitalize() in symbols:
+            graph.add_edge(previous_root, single_root)
+
+            if word not in processed:
+                segments(word[1:], position + 1, previous_root=single_root)
+
+        if len(word) >= 2:
+            double_root = Node(word[0:2], position)
+            if double_root.value.capitalize() in symbols:
+                graph.add_edge(previous_root, double_root)
+
+                if word not in processed:
+                    segments(word[2:], position + 2, previous_root=double_root)
+        processed.add(word)
+
+    processed = set()
+    segments(word)
 
 
 if __name__ == '__main__':

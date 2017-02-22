@@ -61,11 +61,6 @@ def get_args():
         '-V', '--version', action='store_true',
         help='print version info and exit'
     )
-    # TODO(amin): Remove this
-    parser.add_argument(
-        '--use-graph', action='store_true',
-        help='use the graph-based speller'
-    )
 
     return parser.parse_args()
 
@@ -121,9 +116,9 @@ def main():
 
     for word in words:
         if TUPLES:
-            spellings = speller.spell(word, use_graph=args.use_graph)
+            spellings = speller.spell(word)
         else:
-            spellings = [''.join(s) for s in speller.spell(word, use_graph=args.use_graph)]
+            spellings = [''.join(s) for s in speller.spell(word)]
 
         if spellings:
             spellable[word] = spellings
