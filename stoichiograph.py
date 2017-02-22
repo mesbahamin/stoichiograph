@@ -42,7 +42,7 @@ def get_args():
         help='print list of elemental symbols and exit'
     )
     parser.add_argument(
-        '-o', '--output_file',
+        '-o', '--output-file',
         help='path of output json file'
     )
     parser.add_argument(
@@ -60,6 +60,11 @@ def get_args():
     parser.add_argument(
         '-V', '--version', action='store_true',
         help='print version info and exit'
+    )
+    # TODO(amin): Remove this
+    parser.add_argument(
+        '--use-graph', action='store_true',
+        help='use the graph-based speller'
     )
 
     return parser.parse_args()
@@ -116,9 +121,9 @@ def main():
 
     for word in words:
         if TUPLES:
-            spellings = speller.spell(word)
+            spellings = speller.spell(word, use_graph=args.use_graph)
         else:
-            spellings = [''.join(s) for s in speller.spell(word)]
+            spellings = [''.join(s) for s in speller.spell(word, use_graph=args.use_graph)]
 
         if spellings:
             spellable[word] = spellings

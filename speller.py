@@ -1,6 +1,7 @@
 from functools import lru_cache
 from itertools import chain, product
 import logging
+import dag
 
 # TODO(amin): Profile and optimize
 # TODO(amin): Add performance reporting to log
@@ -27,7 +28,7 @@ ELEMENTS = (
 # TODO(amin): Use optional caching/memoization to improve performance
 # TODO(amin): Support appostrophies
 # TODO(amin): Add option to require no repeated symbols
-def spell(word, symbols=ELEMENTS):
+def spell(word, use_graph=False, symbols=ELEMENTS):
     """Return a list of any possible ways to spell a word
     with a given set of symbols.
 
@@ -36,9 +37,21 @@ def spell(word, symbols=ELEMENTS):
     [('Am', 'Pu', 'Ta', 'Ti', 'O', 'N'), ('Am', 'P', 'U', 'Ta', 'Ti', 'O', 'N')]
     """
     log.info('Word: {}'.format(word))
-    groupings = generate_groupings(len(word))
 
-    spellings = [map_word(word, grouping) for grouping in groupings]
+    if use_graph:
+        log.debug('Using graph speller')
+        g = dag.Graph()
+        dag.build_graph(word, g)
+
+        spellings = list()
+        for first in g.firsts():
+            for last in g.lasts():
+                for path in dag.find_all_paths(g._children_of, first, last):
+                    spellings.append(tuple(node.value for node in path))
+
+    else:
+        groupings = generate_groupings(len(word))
+        spellings = [map_word(word, grouping) for grouping in groupings]
 
     elemental_spellings = [
         tuple(token.capitalize() for token in spelling)
