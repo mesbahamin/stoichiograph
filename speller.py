@@ -1,5 +1,4 @@
 from collections import defaultdict, namedtuple
-from functools import lru_cache
 import logging
 
 # TODO(amin): Convert symbol tuple to element name or atomic number tuple
@@ -25,8 +24,8 @@ ELEMENTS = {
 # TODO(amin): Support appostrophies
 # TODO(amin): Add option to require no repeated symbols
 def spell(word, symbols=ELEMENTS):
-    """Return a list of any possible ways to spell a word
-    with a given set of symbols.
+    """Return a list of any possible ways to spell a word with a given
+    set of symbols.
 
     Example:
     >>> spell('amputation')
@@ -36,7 +35,7 @@ def spell(word, symbols=ELEMENTS):
 
     log.debug('Using graph speller')
     g = Graph()
-    build_graph(word, g)
+    build_spelling_graph(word, g)
 
     spellings = list()
     for first in g.firsts():
@@ -54,13 +53,9 @@ def spell(word, symbols=ELEMENTS):
     return elemental_spellings
 
 
-# A single node of the graph.
-Node = namedtuple('Node', ['value', 'position'])
-
-
 class Graph():
-    """A directed acyclic graph that stores all possible
-    elemental spellings of a word.
+    """A directed acyclic graph that stores all possible elemental
+    spellings of a word.
     """
     def __init__(self):
         self._parents_of = defaultdict(set)
@@ -75,8 +70,8 @@ class Graph():
         return self._parents_of[None]
 
     def add_edge(self, parent, child):
-        """Add a parent-child relatonship to the graph.
-        None is ok as a key, but not a value.
+        """Add a parent-child relatonship to the graph. None is ok as a
+        key, but not a value.
         """
         if parent is not None:
             self._parents_of[child].add(parent)
@@ -92,8 +87,7 @@ class Graph():
         ]
 
     def export(self):
-        """Print a string to stdout that can be interpreted by
-        Graphviz.
+        """Print a string to stdout that can be interpreted by Graphviz.
         """
         print('digraph G {')
         for (parent, child) in self.edges():
@@ -103,53 +97,91 @@ class Graph():
         print('}')
 
 
-def find_all_paths(graph, start, end, path=[]):
-    """Return a list of all paths through the graph from start
-    to end.
+# A single node of the graph.
+Node = namedtuple('Node', ['value', 'position'])
+
+
+def build_spelling_graph(word, graph, symbols=ELEMENTS):
+    """Given a word and a graph, find all single and double-character
+    tokens in the word. Add them to the graph only if they are present
+    within the given set of allowed symbols.
+    """
+
+    def pop_root(remaining, position=0, previous_root=None):
+        """Pop the single and double-character roots off the front of a
+        given string, then recurse into what remains.
+
+        For the word 'because', the roots and remainders look something
+        like:
+
+            'b' 'ecause'
+                'e' 'cause'
+                    'c' 'ause'
+                        'a' 'use'
+                            'u' 'se'
+                                's' 'e'
+                                    'e' ''
+                                'se' ''
+                            'us' 'e'
+                        'au' 'se'
+                    'ca' 'use'
+                'ec' 'ause'
+            'be' 'cause'
+
+        For each root present in the set of allowed symbols, add an edge
+        to the graph:
+
+            previous root --> current root.
+
+        Keep track of processed values for `remaining` and do not
+        evaluate a given value more than once.
+
+        Keep track of the position of each root so that repeated roots
+        are distinct nodes.
+        """
+        if remaining == '':
+            graph.add_edge(previous_root, None)
+            return
+
+        single_root = Node(remaining[0], position)
+        if single_root.value.capitalize() in symbols:
+            graph.add_edge(previous_root, single_root)
+
+            if remaining not in processed:
+                pop_root(remaining[1:], position + 1, previous_root=single_root)
+
+        if len(remaining) >= 2:
+            double_root = Node(remaining[0:2], position)
+            if double_root.value.capitalize() in symbols:
+                graph.add_edge(previous_root, double_root)
+
+                if remaining not in processed:
+                    pop_root(remaining[2:], position + 2, previous_root=double_root)
+        processed.add(remaining)
+
+    processed = set()
+    pop_root(word)
+
+
+def find_all_paths(parents_to_children, start, end, path=[]):
+    """Return a list of all paths through a graph from start to end.
+    `parents_to_children` is a dict with parent nodes as keys and sets
+    of child nodes as values.
+
     Based on https://www.python.org/doc/essays/graphs/
     """
     path = path + [start]
     if start == end:
         return [path]
-    if start not in graph.keys():
+    if start not in parents_to_children.keys():
         return []
     paths = []
-    for node in graph[start]:
+    for node in parents_to_children[start]:
         if node not in path:
-            newpaths = find_all_paths(graph, node, end, path)
+            newpaths = find_all_paths(parents_to_children, node, end, path)
             for newpath in newpaths:
                 paths.append(tuple(newpath))
     return paths
-
-
-def build_graph(word, graph, symbols=ELEMENTS):
-    """Given a word and a graph, recursively find all single and
-    double-character tokens in the word and add them to the graph.
-    """
-
-    def segments(word, position=0, previous_root=None):
-        if word == '':
-            graph.add_edge(previous_root, None)
-            return
-
-        single_root = Node(word[0], position)
-        if single_root.value.capitalize() in symbols:
-            graph.add_edge(previous_root, single_root)
-
-            if word not in processed:
-                segments(word[1:], position + 1, previous_root=single_root)
-
-        if len(word) >= 2:
-            double_root = Node(word[0:2], position)
-            if double_root.value.capitalize() in symbols:
-                graph.add_edge(previous_root, double_root)
-
-                if word not in processed:
-                    segments(word[2:], position + 2, previous_root=double_root)
-        processed.add(word)
-
-    processed = set()
-    segments(word)
 
 
 if __name__ == '__main__':
