@@ -147,6 +147,28 @@ class TestGraph:
         assert None not in test_graph._children_of[parent]
         assert parent in test_graph._parents_of[child]
 
+    def test_nodes(self, test_graph):
+        """Assert that the graph properly lists its nodes."""
+        assert set(test_graph.nodes(connected_only=True)) == set([
+            Node(value='be', position=0),
+            Node(value='c', position=2),
+            Node(value='ca', position=2),
+            Node(value='au', position=3),
+            Node(value='u', position=4),
+            Node(value='s', position=5),
+            Node(value='se', position=5),
+        ])
+        assert set(test_graph.nodes(connected_only=False)) == set([
+            Node(value='b', position=0),
+            Node(value='be', position=0),
+            Node(value='c', position=2),
+            Node(value='ca', position=2),
+            Node(value='au', position=3),
+            Node(value='u', position=4),
+            Node(value='s', position=5),
+            Node(value='se', position=5),
+        ])
+
     def test_edges(self, test_graph):
         """Assert that the graph properly lists its edges."""
         assert set(test_graph.edges()) == set([
@@ -162,4 +184,26 @@ class TestGraph:
             (Node(value='u', position=4), Node(value='se', position=5))
         ])
 
-    #TODO(amin): add a test for test_graph.export().
+    def test_export(self, test_graph):
+        """Assert that the graph exports the proper dot code."""
+        assert test_graph.export() == (
+"""digraph G {
+	graph [rankdir=LR];
+	node [width=0.75 shape=circle];
+	"Node(value='au', position=3)" -> "Node(value='s', position=5)";
+	"Node(value='au', position=3)" -> "Node(value='se', position=5)";
+	"Node(value='be', position=0)" -> "Node(value='c', position=2)";
+	"Node(value='be', position=0)" -> "Node(value='ca', position=2)";
+	"Node(value='c', position=2)" -> "Node(value='au', position=3)";
+	"Node(value='ca', position=2)" -> "Node(value='u', position=4)";
+	"Node(value='u', position=4)" -> "Node(value='s', position=5)";
+	"Node(value='u', position=4)" -> "Node(value='se', position=5)";
+	"Node(value='au', position=3)" [label="Au"];
+	"Node(value='be', position=0)" [label="Be"];
+	"Node(value='c', position=2)" [label="C"];
+	"Node(value='ca', position=2)" [label="Ca"];
+	"Node(value='s', position=5)" [label="S"];
+	"Node(value='se', position=5)" [label="Se"];
+	"Node(value='u', position=4)" [label="U"];
+}"""
+        )

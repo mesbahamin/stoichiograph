@@ -42,6 +42,10 @@ def get_args():
         help='print list of elemental symbols and exit'
     )
     parser.add_argument(
+        '--export-graph', action='store_true',
+        help='export graph of first word as dot code'
+    )
+    parser.add_argument(
         '-o', '--output-file',
         help='path of output json file'
     )
@@ -111,6 +115,12 @@ def main():
 
     if SORT_WORDS:
         words.sort(key=len, reverse=True)
+
+    if args.export_graph and words:
+        g = speller.Graph()
+        speller.build_spelling_graph(words[0], g)
+        print(g.export())
+        raise SystemExit
 
     spellable = collections.OrderedDict()
 

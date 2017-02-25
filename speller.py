@@ -1,4 +1,5 @@
 from collections import defaultdict, namedtuple
+from io import StringIO
 import logging
 
 # TODO(amin): Convert symbol tuple to element name or atomic number tuple
@@ -73,10 +74,29 @@ class Graph():
         """Add a parent-child relatonship to the graph. None is ok as a
         key, but not a value.
         """
+        log.debug('add_edge({}, {})'.format(parent, child))
         if parent is not None:
             self._parents_of[child].add(parent)
         if child is not None:
             self._children_of[parent].add(child)
+
+    def nodes(self, connected_only=True):
+        """Return a list of all nodes."""
+        if connected_only:
+            return set(
+                node for node in
+                set(self._children_of.keys()) | set(self._parents_of.keys())
+                if node is not None
+            )
+        else:
+            return set(
+                node for node in
+                set(self._children_of.keys())
+                | set(self._parents_of.keys())
+                | set(v for s in self._children_of.values() for v in s)
+                | set(v for s in self._parents_of.values() for v in s)
+                if node is not None
+            )
 
     def edges(self):
         """Return a list of all parent-child relationships."""
@@ -86,15 +106,28 @@ class Graph():
             for child in self._children_of[parent]
         ]
 
-    def export(self):
-        """Print a string to stdout that can be interpreted by Graphviz.
+    # TODO(amin): Eliminate dead-end nodes from exported graph.
+    def export(self, connected_only=True):
+        """Print a string to stdout that can be piped to Graphviz to
+        generate a graph diagram.
         """
-        print('digraph G {')
-        for (parent, child) in self.edges():
-            a = None if parent is None else parent.value
-            b = None if child is None else child.value
-            print('\t{} -> {}'.format(a, b))
-        print('}')
+        export = StringIO()
+        export.write('digraph G {\n')
+        export.write('\tgraph [rankdir=LR];\n')
+        export.write('\tnode [width=0.75 shape=circle];\n')
+
+        edges = [
+            (p, c)
+            for p, c in self.edges()
+            if p is not None and c is not None
+        ]
+        for parent, child in sorted(edges):
+            export.write('\t"{}" -> "{}";\n'.format(parent, child))
+
+        for node in sorted(self.nodes(connected_only=connected_only)):
+            export.write('\t"{}" [label="{}"];\n'.format(node, node.value.capitalize()))
+        export.write('}')
+        return export.getvalue()
 
 
 # A single node of the graph.

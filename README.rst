@@ -1,5 +1,5 @@
-Stoichiograph
-=============
+Stoichiograph - The Elemental Speller
+=====================================
 
 Spell words with elemental symbols from the periodic table ("He", "Cu", etc).
 
@@ -15,7 +15,7 @@ Usage
 .. code-block::
 
     usage: stoichiograph [-h] [-b BATCH_FILE] [-c] [--debug] [--list-elements]
-                         [-o OUTPUT_FILE] [-s] [-t] [-v] [-V]
+                         [--export-graph] [-o OUTPUT_FILE] [-s] [-t] [-v] [-V]
                          [words [words ...]]
 
     Spell words with elemental symbols from the periodic table.
@@ -30,7 +30,8 @@ Usage
       -c, --clobber         overwrite output file if it exists
       --debug               print debug log
       --list-elements       print list of elemental symbols and exit
-      -o OUTPUT_FILE, --output_file OUTPUT_FILE
+      --export-graph        export graph of first word as dot code
+      -o OUTPUT_FILE, --output-file OUTPUT_FILE
                             path of output json file
       -s, --sort            sort words by length
       -t, --tuples          display spellings as tuples
