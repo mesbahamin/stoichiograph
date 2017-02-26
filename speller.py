@@ -38,16 +38,15 @@ def spell(word, symbols=ELEMENTS):
     g = Graph()
     build_spelling_graph(word, g)
 
-    spellings = list()
-    for first in g.firsts():
-        for last in g.lasts():
-            for path in find_all_paths(g._children_of, first, last):
-                spellings.append(tuple(node.value for node in path))
-
-    elemental_spellings = sorted([
-        tuple(token.capitalize() for token in spelling)
-        for spelling in spellings
-    ], reverse=True)
+    elemental_spellings = sorted(
+        [
+            tuple(node.value.capitalize() for node in path)
+            for first in g.firsts()
+            for last in g.lasts()
+            for path in find_all_paths(g._children_of, first, last)
+        ],
+        reverse=True
+    )
 
     log.info('Spellings: {}'.format(elemental_spellings))
 
