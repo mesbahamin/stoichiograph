@@ -113,8 +113,8 @@ class Graph():
         """
         export = StringIO()
         export.write('digraph G {\n')
-        export.write('\tgraph [rankdir=LR];\n')
-        export.write('\tnode [width=0.75 shape=circle];\n')
+        export.write('    graph [rankdir=LR];\n')
+        export.write('    node [width=0.75 shape=circle];\n')
 
         edges = [
             (p, c)
@@ -122,10 +122,10 @@ class Graph():
             if p is not None and c is not None
         ]
         for parent, child in sorted(edges):
-            export.write('\t"{}" -> "{}";\n'.format(parent, child))
+            export.write('    "{}" -> "{}";\n'.format(parent, child))
 
         for node in sorted(self.nodes(connected_only=connected_only)):
-            export.write('\t"{}" [label="{}"];\n'.format(node, node.value.capitalize()))
+            export.write('    "{}" [label="{}"];\n'.format(node, node.value.capitalize()))
         export.write('}')
         return export.getvalue()
 

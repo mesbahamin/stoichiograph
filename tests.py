@@ -187,23 +187,23 @@ class TestGraph:
     def test_export(self, test_graph):
         """Assert that the graph exports the proper dot code."""
         assert test_graph.export() == (
-"""digraph G {
-	graph [rankdir=LR];
-	node [width=0.75 shape=circle];
-	"Node(value='au', position=3)" -> "Node(value='s', position=5)";
-	"Node(value='au', position=3)" -> "Node(value='se', position=5)";
-	"Node(value='be', position=0)" -> "Node(value='c', position=2)";
-	"Node(value='be', position=0)" -> "Node(value='ca', position=2)";
-	"Node(value='c', position=2)" -> "Node(value='au', position=3)";
-	"Node(value='ca', position=2)" -> "Node(value='u', position=4)";
-	"Node(value='u', position=4)" -> "Node(value='s', position=5)";
-	"Node(value='u', position=4)" -> "Node(value='se', position=5)";
-	"Node(value='au', position=3)" [label="Au"];
-	"Node(value='be', position=0)" [label="Be"];
-	"Node(value='c', position=2)" [label="C"];
-	"Node(value='ca', position=2)" [label="Ca"];
-	"Node(value='s', position=5)" [label="S"];
-	"Node(value='se', position=5)" [label="Se"];
-	"Node(value='u', position=4)" [label="U"];
+            """digraph G {
+    graph [rankdir=LR];
+    node [width=0.75 shape=circle];
+    "Node(value='au', position=3)" -> "Node(value='s', position=5)";
+    "Node(value='au', position=3)" -> "Node(value='se', position=5)";
+    "Node(value='be', position=0)" -> "Node(value='c', position=2)";
+    "Node(value='be', position=0)" -> "Node(value='ca', position=2)";
+    "Node(value='c', position=2)" -> "Node(value='au', position=3)";
+    "Node(value='ca', position=2)" -> "Node(value='u', position=4)";
+    "Node(value='u', position=4)" -> "Node(value='s', position=5)";
+    "Node(value='u', position=4)" -> "Node(value='se', position=5)";
+    "Node(value='au', position=3)" [label="Au"];
+    "Node(value='be', position=0)" [label="Be"];
+    "Node(value='c', position=2)" [label="C"];
+    "Node(value='ca', position=2)" [label="Ca"];
+    "Node(value='s', position=5)" [label="S"];
+    "Node(value='se', position=5)" [label="Se"];
+    "Node(value='u', position=4)" [label="U"];
 }"""
         )
