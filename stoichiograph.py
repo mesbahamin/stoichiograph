@@ -109,6 +109,7 @@ def main():
         with words_file.open('r') as f:
             dictionary = f.readlines()
 
+        # TODO(amin): Handle punctuation, apostraphies, etc.
         words = [word.rstrip('\n') for word in dictionary if "'" not in word]
     else:
         words = args.words

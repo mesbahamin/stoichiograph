@@ -34,13 +34,13 @@ def spell(word, symbols=ELEMENTS):
     """
     log.info('Word: {}'.format(word))
 
-    log.debug('Using graph speller')
     g = Graph()
     build_spelling_graph(word, g)
 
     elemental_spellings = sorted(
         [
             tuple(node.value.capitalize() for node in path)
+            # There will only ever be at most 2 firsts and 2 lasts.
             for first in g.firsts()
             for last in g.lasts()
             for path in find_all_paths(g._children_of, first, last)
@@ -129,13 +129,13 @@ class Graph():
         return export.getvalue()
 
 
-# A single node of the graph.
+# A single node of the graph. A glyph and its position in the word.
 Node = namedtuple('Node', ['value', 'position'])
 
 
 def build_spelling_graph(word, graph, symbols=ELEMENTS):
     """Given a word and a graph, find all single and double-character
-    tokens in the word. Add them to the graph only if they are present
+    glyphs in the word. Add them to the graph only if they are present
     within the given set of allowed symbols.
     """
 
@@ -143,8 +143,8 @@ def build_spelling_graph(word, graph, symbols=ELEMENTS):
         """Pop the single and double-character roots off the front of a
         given string, then recurse into what remains.
 
-        For the word 'because', the roots and remainders look something
-        like:
+        For the word 'because', the roots and remainders for each call
+        look something like:
 
             'b' 'ecause'
                 'e' 'cause'
