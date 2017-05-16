@@ -1,4 +1,9 @@
-.cache/*
-__pycache__/*
 *.json
 *.swp
+
+__pycache__/
+.cache/
+perf_tests/
+build/
+dist/
+Stoichiograph.egg-info/

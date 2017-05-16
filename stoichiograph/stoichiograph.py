@@ -6,7 +6,7 @@ import json
 import logging
 import pathlib
 
-import speller
+from stoichiograph import speller
 
 __title__ = 'stoichiograph'
 __author__ = 'Amin Mesbah'

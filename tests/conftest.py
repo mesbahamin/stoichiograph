@@ -1,6 +1,6 @@
 from collections import defaultdict
 import pytest
-from speller import Graph, Node
+from stoichiograph.speller import Graph, Node
 
 
 @pytest.fixture()

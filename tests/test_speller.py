@@ -1,6 +1,6 @@
 from collections import defaultdict
-import speller
-from speller import Node
+from stoichiograph import speller
+from stoichiograph.speller import Node
 
 ELEMENTS = {
     'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al',
